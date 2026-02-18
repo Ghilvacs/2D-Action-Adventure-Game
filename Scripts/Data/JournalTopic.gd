@@ -1,6 +1,8 @@
 class_name JournalTopic extends Resource
 
-@export var category: JournalEntry.Category
+enum Category { OBJECTIVE, EQUIPMENT, BESTIARY, ENVIRONMENT, ARCHIVE }
+
+@export var category: JournalTopic.Category
 @export var title: String
 @export var icon: Texture2D
 @export_multiline var overview_text: String

@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://785nsmfmsc8a"]
+
+[ext_resource type="Script" path="res://Scripts/GUI/Journal/BoardMenu/TopicBoardNode.gd" id="1_3e8bi"]
+
+[node name="TopicBoardNode" type="PanelContainer"]
+custom_minimum_size = Vector2(300, 200)
+script = ExtResource("1_3e8bi")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+
+[node name="ButtonConnect" type="Button" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 0
+text = "connect"
+
+[node name="ButtonRemove" type="Button" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+text = "Remove"
+
+[node name="ButtonMove" type="Button" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+text = "Move
+"
+
+[node name="TitleLabel" type="Label" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Light Circle Tool"
+
+[node name="EntryListContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_vertical = 8

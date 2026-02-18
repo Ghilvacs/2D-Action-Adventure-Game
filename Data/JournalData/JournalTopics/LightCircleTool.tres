@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_vq8an")
-category = 2
+category = 1
 title = "Light Circle Tool"
 overview_text = ""

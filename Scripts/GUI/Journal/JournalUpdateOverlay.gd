@@ -6,6 +6,7 @@ extends CanvasLayer
 signal JournalUpdateOverlayShown
 signal JournalUpdateOverlayHidden
 
+
 func show_journal_update_overlay(entry_title: String) -> void:
 	if PauseMenu.is_paused or InventoryMenu.in_inventory or JournalMenu.in_journal:
 		return

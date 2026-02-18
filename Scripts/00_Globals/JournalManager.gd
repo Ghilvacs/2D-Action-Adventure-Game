@@ -1,14 +1,12 @@
 extends Node
 
 var unlocked_entries: Array[JournalEntry] = []
-var discovered_clues: Array[ClueData] = []
-var solved_deductions: Array[DeductionData] = []
+var topics_on_board: Array[JournalTopic] = []
 var is_journal_update_overlay: bool = false 
 var last_unlocked_entry: JournalEntry = null
 
 signal journal_updated(entry: JournalEntry)
-signal clue_added(clue: ClueData)
-signal deduction_formed(deduction: DeductionData)
+signal topic_removed_from_board(topic: JournalTopic)
 
 
 func get_known_topics(category_enum: int) -> Array[JournalTopic]:
@@ -41,18 +39,24 @@ func unlock_entry(entry: JournalEntry) -> void:
 		JournalUpdateOverlay.show_journal_update_overlay(entry.title)
 
 
+func register_topic_om_board(topic: JournalTopic) -> void:
+	if not topics_on_board.has(topic):
+		topics_on_board.append(topic)
+
+
+func unregister_topic_om_board(topic: JournalTopic) -> void:
+	if topics_on_board.has(topic):
+		topics_on_board.erase(topic)
+		emit_signal("topic_removed_from_board", topic)
+
+
+func is_topic_on_board(topic: JournalTopic) -> bool:
+	return topics_on_board.has(topic)
+
+
 func turn_on_update_overlay() -> void:
 	is_journal_update_overlay = true
 
+
 func turn_off_update_overlay() -> void:
 	is_journal_update_overlay = false
-
-
-func add_clue(clue: ClueData) -> void:
-	if clue not in discovered_clues:
-		discovered_clues.append(clue)
-		emit_signal("clue_added", clue)
-
-
-func attempt_clues_connection(clue_a: ClueData, clue_b: ClueData) -> bool:
-	return false

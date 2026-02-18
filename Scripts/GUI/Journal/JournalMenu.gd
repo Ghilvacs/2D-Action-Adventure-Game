@@ -1,22 +1,26 @@
 extends CanvasLayer
 
 @onready var sections_container: HBoxContainer = $Control/MarginContainer/VBoxContainer/SectionsContainer
-@onready var button_goals: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonGoals
-@onready var button_quests: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonQuests
-@onready var button_tools: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonTools
-@onready var button_enemies: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonEnemies
-@onready var button_factions: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonFactions
-@onready var button_locations: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonLocations
-@onready var button_lore: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonLore
+@onready var button_objectives: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonObjectives
+@onready var button_equipment: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonEquipment
+@onready var button_bestiary: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonBestiary
+@onready var button_environment: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonEnvironment
+@onready var button_archive: Button = $Control/MarginContainer/VBoxContainer/SectionsContainer/ButtonArchive
 @onready var topic_list_container: VBoxContainer = $Control/MarginContainer/VBoxContainer/HSplitContainer/ScrollContainer/TopicListContainer
-@onready var detail_title_label: Label = $Control/MarginContainer/VBoxContainer/HSplitContainer/Panel/MarginContainer/DetailsContainer/DetailTitleLabel
-@onready var entry_list_container: VBoxContainer = $Control/MarginContainer/VBoxContainer/HSplitContainer/Panel/MarginContainer/DetailsContainer/HBoxContainer/ScrollContainer/EntryListContainer
-@onready var scroll_container_overview: ScrollContainer = $Control/MarginContainer/VBoxContainer/HSplitContainer/Panel/MarginContainer/DetailsContainer/HBoxContainer/ScrollContainerOverview
-@onready var overview_description_label: RichTextLabel = $Control/MarginContainer/VBoxContainer/HSplitContainer/Panel/MarginContainer/DetailsContainer/HBoxContainer/ScrollContainerOverview/OverviewDescriptionLabel
+@onready var scroll_container_overview: ScrollContainer = $Control/MarginContainer/VBoxContainer/HSplitContainer/DetailsPanel/MarginContainer/DetailsContainer/HBoxContainer/ScrollContainerOverview
+@onready var button_journal: Button = $Control/HBoxContainer/ButtonJournal
+@onready var button_board: Button = $Control/HBoxContainer/ButtonBoard
+@onready var detail_title_label: Label = $Control/MarginContainer/VBoxContainer/HSplitContainer/DetailsPanel/MarginContainer/DetailsContainer/DetailTitleLabel
+@onready var overview_description_label: RichTextLabel = $Control/MarginContainer/VBoxContainer/HSplitContainer/DetailsPanel/MarginContainer/DetailsContainer/HBoxContainer/ScrollContainerOverview/OverviewDescriptionLabel
+@onready var entry_list_container: VBoxContainer = $Control/MarginContainer/VBoxContainer/HSplitContainer/DetailsPanel/MarginContainer/DetailsContainer/HBoxContainer/ScrollContainer/EntryListContainer
+@onready var details_panel: Panel = $Control/MarginContainer/VBoxContainer/HSplitContainer/DetailsPanel
+@onready var board_panel: Panel = $Control/MarginContainer/VBoxContainer/HSplitContainer/BoardPanel
 
-enum Category { GOAL, QUEST, TOOL, ENEMY, FACTION, LOCATION, LORE }
+enum Category { OBJECTIVE, EQUIPMENT, BESTIARY, ENVIRONMENT, ARCHIVE }
+enum ViewMode { JOURNAL, BOARD }
 
-var current_category = Category.GOAL
+var current_category = Category.OBJECTIVE
+var current_view_mode = ViewMode.JOURNAL
 var current_topic: JournalTopic
 var in_journal: bool = false
 var entry_text_indices: Dictionary = {}
@@ -26,16 +30,19 @@ signal JournalHidden
 
 
 func _ready() -> void:
-	button_goals.pressed.connect(show_category.bind(Category.GOAL))
-	button_quests.pressed.connect(show_category.bind(Category.QUEST))
-	button_tools.pressed.connect(show_category.bind(Category.TOOL))
-	button_enemies.pressed.connect(show_category.bind(Category.ENEMY))
-	button_factions.pressed.connect(show_category.bind(Category.FACTION))
-	button_locations.pressed.connect(show_category.bind(Category.LOCATION))
-	button_lore.pressed.connect(show_category.bind(Category.LORE))
-	
+	button_objectives.pressed.connect(show_category.bind(Category.OBJECTIVE))
+	button_equipment.pressed.connect(show_category.bind(Category.EQUIPMENT))
+	button_bestiary.pressed.connect(show_category.bind(Category.BESTIARY))
+	button_environment.pressed.connect(show_category.bind(Category.ENVIRONMENT))
+	button_archive.pressed.connect(show_category.bind(Category.ARCHIVE))
+	button_journal.pressed.connect(set_view_mode.bind(ViewMode.JOURNAL))
+	button_board.pressed.connect(set_view_mode.bind(ViewMode.BOARD))
+
 	JournalManager.journal_updated.connect(_on_journal_updated)
-	show_category(Category.GOAL)
+	JournalManager.topic_removed_from_board.connect(_on_topic_removed_from_board)
+	
+	show_category(Category.OBJECTIVE)
+	set_view_mode(ViewMode.JOURNAL)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -48,6 +55,19 @@ func _unhandled_input(event: InputEvent) -> void:
 			hide_journal()
 				
 		get_viewport().set_input_as_handled()
+
+
+func set_view_mode(mode: ViewMode) -> void:
+	current_view_mode = mode
+	
+	match mode:
+		ViewMode.JOURNAL:
+			details_panel.visible = true
+			board_panel.visible = false
+		ViewMode.BOARD:
+			details_panel.visible = false
+			board_panel.visible = true
+			board_panel.reset_view()
 
 
 func show_journal() -> void:
@@ -75,11 +95,16 @@ func show_category(category: int) -> void:
 	var topics = JournalManager.get_known_topics(category)
 	
 	for topic in topics:
-		var button = Button.new()
+		var button = DraggableTopicButton.new()
+		button.topic_data = topic
 		button.text = topic.title
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.custom_minimum_size = Vector2(200.0, 0.0)
 		button.add_theme_font_size_override("Arial", 30)
+		
+		if JournalManager.is_topic_on_board(topic):
+			button.mark_as_placed()
+		
 		button.pressed.connect(select_topic.bind(topic))
 		topic_list_container.add_child(button)
 	
@@ -90,6 +115,7 @@ func show_category(category: int) -> void:
 		detail_title_label.text = ""
 		overview_description_label.text = ""
 		current_topic = null
+
 
 func select_topic(topic: JournalTopic) -> void:
 	current_topic = topic
@@ -118,8 +144,9 @@ func select_topic(topic: JournalTopic) -> void:
 func open_to_specific_entry(entry: JournalEntry) -> void:
 	if not in_journal:
 		show_journal()
-	
+		
 	var parent_topic = entry.parent_topic
+	set_view_mode(ViewMode.JOURNAL)
 	
 	if parent_topic:
 		show_category(parent_topic.category)
@@ -164,3 +191,9 @@ func _on_journal_updated() -> void:
 	
 	if current_topic:
 		select_topic(current_topic)
+
+
+func _on_topic_removed_from_board(topic: JournalTopic) -> void:
+	for child in topic_list_container.get_children():
+		if child is DraggableTopicButton and child.topic_data == topic:
+			child.mark_as_available()
