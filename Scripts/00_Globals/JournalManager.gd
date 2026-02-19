@@ -8,6 +8,24 @@ var last_unlocked_entry: JournalEntry = null
 signal journal_updated(entry: JournalEntry)
 signal topic_removed_from_board(topic: JournalTopic)
 
+enum Category { OBJECTIVE, EQUIPMENT, BESTIARY, ENVIRONMENT, ARCHIVE }
+
+const BG_COLORS = {
+	Category.OBJECTIVE: Color("ffffff"),  # Paper
+	Category.EQUIPMENT: Color("00c7ff"),  # Cyan (Tech/Tools)
+	Category.BESTIARY:  Color("ff336b"),  # Red (Danger)
+	Category.ENVIRONMENT: Color("59fd4a"),# Green (Nature/Toxic)
+	Category.ARCHIVE: Color("e18500") # Muted Purple/Grey (History)
+}
+
+const BOARD_COLORS = {
+	Category.OBJECTIVE: Color("2e2e2e"),  # Paper
+	Category.EQUIPMENT: Color("003f5c"),  # Cyan (Tech/Tools)
+	Category.BESTIARY:  Color("5c0018"),  # Red (Danger)
+	Category.ENVIRONMENT: Color("1a4517"),# Green (Nature/Toxic)
+	Category.ARCHIVE: Color("5c3a00") # Muted Purple/Grey (History)
+}
+
 
 func get_known_topics(category_enum: int) -> Array[JournalTopic]:
 	var known_topics: Array[JournalTopic] = []
@@ -26,6 +44,7 @@ func get_entries_for_topic(topic: JournalTopic) -> Array[JournalEntry]:
 	for entry in unlocked_entries:
 		if entry.parent_topic == topic:
 			entries.append(entry)
+			
 	return entries
 
 
@@ -36,7 +55,21 @@ func unlock_entry(entry: JournalEntry) -> void:
 		unlocked_entries.append(entry)
 		last_unlocked_entry = entry
 		emit_signal("journal_updated")
-		JournalUpdateOverlay.show_journal_update_overlay(entry.title)
+		JournalUpdateOverlay.show_journal_update_overlay(entry)
+
+
+func get_category_color(category: int) -> Color:
+	if BG_COLORS.has(category):
+		return BG_COLORS[category]
+	
+	return Color.WHITE
+
+
+func get_category_board_color(category: int) -> Color:
+	if BOARD_COLORS.has(category):
+		return BOARD_COLORS[category]
+	
+	return Color.DIM_GRAY
 
 
 func register_topic_om_board(topic: JournalTopic) -> void:

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="JournalEntry" load_steps=3 format=3 uid="uid://dsk4j04a13ysf"]
+
+[ext_resource type="Resource" uid="uid://ce3am0darg2j" path="res://Data/JournalData/JournalTopics/ObjectiveReachSurface.tres" id="1_3ybpe"]
+[ext_resource type="Script" path="res://Scripts/Data/JournalEntry.gd" id="1_m2byn"]
+
+[resource]
+script = ExtResource("1_m2byn")
+parent_topic = ExtResource("1_3ybpe")
+title = "Leave Room "
+description = "I have to leave the ritual room and reach the surface."

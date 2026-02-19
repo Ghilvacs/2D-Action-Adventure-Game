@@ -260,6 +260,15 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
+[node name="ConnectionsLayer" type="Control" parent="Control/MarginContainer/VBoxContainer/HSplitContainer/BoardPanel/BoardOrigin"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
 [node name="NodesLayer" type="Control" parent="Control/MarginContainer/VBoxContainer/HSplitContainer/BoardPanel/BoardOrigin"]
 layout_mode = 1
 anchors_preset = 15
@@ -268,3 +277,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="LineDrag" type="Line2D" parent="Control/MarginContainer/VBoxContainer/HSplitContainer/BoardPanel/BoardOrigin"]
+visible = false
+width = 3.0

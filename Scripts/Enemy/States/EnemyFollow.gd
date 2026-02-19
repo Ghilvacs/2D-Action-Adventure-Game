@@ -26,6 +26,9 @@ const PATHFINDER: PackedScene = preload("res://Scenes/Enemy/Pathfinder.tscn")
 @export var attack_up_animation: String = "attack_up"
 @export var attack_down_animation: String = "attack_down"
 
+@export_category("Journal Entry")
+@export var journal_entry_first_encounter: JournalEntry
+
 var player: CharacterBody2D
 var pathfinder: Pathfinder
 var direction: Vector2 = Vector2.ZERO
@@ -39,6 +42,8 @@ var _attack_anim := ""
 
 
 func enter(prev_state: EnemyState) -> void:
+	if journal_entry_first_encounter:
+			JournalManager.unlock_entry(journal_entry_first_encounter)
 	enemy.vision_mode = enemy.VisionMode.LOOK_AT_PLAYER
 
 	pathfinder = PATHFINDER.instantiate() as Pathfinder

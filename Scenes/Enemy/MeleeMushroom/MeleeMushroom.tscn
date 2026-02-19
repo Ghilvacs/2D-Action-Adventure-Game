@@ -1,4 +1,4 @@
-[gd_scene load_steps=88 format=3 uid="uid://dmbyfr52cbw3a"]
+[gd_scene load_steps=89 format=3 uid="uid://dmbyfr52cbw3a"]
 
 [ext_resource type="Script" path="res://Scripts/Enemy/MeleeMushroom/MeleeMushroom.gd" id="1_8ditj"]
 [ext_resource type="Shader" path="res://Scenes/Shaders/player_damage.gdshader" id="1_sce35"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://Scripts/Enemy/States/EnemyFollow.gd" id="6_eut3x"]
 [ext_resource type="Script" path="res://Scripts/Enemy/States/EnemyDead.gd" id="7_tdtna"]
 [ext_resource type="Resource" uid="uid://bx4pdsq6ssm5n" path="res://Data/ItemData/currency.tres" id="8_vhfuu"]
+[ext_resource type="Resource" uid="uid://bh1y5vt4wnpgf" path="res://Data/JournalData/JournalEntries/MushroomEnemyFirstEncounter.tres" id="9_kab2n"]
 [ext_resource type="Script" path="res://Scripts/Enemy/DropData.gd" id="9_qachr"]
 [ext_resource type="Script" path="res://Scripts/Enemy/States/EnemyStun.gd" id="10_cxqkd"]
 [ext_resource type="Script" path="res://Scripts/Enemy/States/EnemyKnockback.gd" id="11_qb3xp"]
@@ -796,6 +797,7 @@ attack_state = NodePath("../Attack")
 attack_transition_delay = 0.1
 melee_while_following = false
 use_vertical_attack_anims = false
+journal_entry_first_encounter = ExtResource("9_kab2n")
 
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("7_tdtna")

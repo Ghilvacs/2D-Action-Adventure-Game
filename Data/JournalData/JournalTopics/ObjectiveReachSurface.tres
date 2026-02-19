@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="JournalTopic" load_steps=2 format=3 uid="uid://ce3am0darg2j"]
+
+[ext_resource type="Script" path="res://Scripts/Data/JournalTopic.gd" id="1_7l6dl"]
+
+[resource]
+script = ExtResource("1_7l6dl")
+category = 0
+title = "Reach the Surface"
+overview_text = ""

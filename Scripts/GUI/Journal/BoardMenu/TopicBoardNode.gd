@@ -13,6 +13,7 @@ var is_moving_mode: bool = false
 
 func _ready() -> void:
 	button_move.pressed.connect(_on_move_button_pressed)
+	button_connect.pressed.connect(_on_connect_button_pressed)
 
 
 func _process(delta: float) -> void:
@@ -32,10 +33,32 @@ func setup(topic: JournalTopic) -> void:
 	my_topic = topic
 	title_label.text = topic.title
 	button_remove.pressed.connect(remove_topic_from_board)
+	
+	var category_color = JournalManager.get_category_board_color(topic.category)
+	var style = StyleBoxFlat.new()
+	
+	style.bg_color = category_color
+	style.border_width_left = 2
+	style.border_width_top = 2
+	style.border_width_right = 2
+	style.border_width_bottom = 2
+	style.border_color = Color.WHITE
+	style.corner_radius_top_left = 5
+	style.corner_radius_top_right = 5
+	style.corner_radius_bottom_right = 5
+	style.corner_radius_bottom_left = 5
 
+	add_theme_stylebox_override("panel", style)
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var board = find_parent("BoardPanel")
+		
+		if board and board.connection_source_node != null:
+			board.finish_connection_attempt(self)
+			get_viewport().set_input_as_handled()
+			return
+		
 		toggle_entries()
 
 
@@ -68,8 +91,10 @@ func populate_entries() -> void:
 
 func confirm_placement() -> void:
 	is_moving_mode = false
+	
 	if is_expanded:
 		entry_list_container.visible = true
+		
 	modulate.a = 1.0
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
@@ -79,3 +104,15 @@ func _on_move_button_pressed() -> void:
 	entry_list_container.visible = false
 	modulate.a = 0.7
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func _on_connect_button_pressed() -> void:
+	var board = find_parent("BoardPanel")
+	
+	if board:
+		if board.connection_source_node == null:
+			board.start_connection_attempt(self)
+		elif board.connection_source_node != self:
+			board.finish_connection_attempt(self)
+		else:
+			board.finish_connection_attempt(self)

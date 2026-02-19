@@ -39,6 +39,9 @@ const MAX_STAMINA = 100
 @export var exposure_max: float = 0.9
 @export var exposure: float = 0.9
 
+@export_category("Journal Entries")
+@export var journal_entry_leave_room: JournalEntry
+
 var current_health = MAX_HEALTH
 var current_stamina = MAX_STAMINA
 var enemy: CharacterBody2D
@@ -66,6 +69,8 @@ func _ready() -> void:
 	StaminaChanged.emit(current_stamina)
 	var dash_shape := blade_area_one.get_child(1) as CollisionShape2D
 	dash_shape.disabled = true
+	if journal_entry_leave_room:
+		JournalManager.unlock_entry(journal_entry_leave_room)
 
 
 func _physics_process(delta: float) -> void:

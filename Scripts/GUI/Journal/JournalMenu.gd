@@ -15,11 +15,11 @@ extends CanvasLayer
 @onready var entry_list_container: VBoxContainer = $Control/MarginContainer/VBoxContainer/HSplitContainer/DetailsPanel/MarginContainer/DetailsContainer/HBoxContainer/ScrollContainer/EntryListContainer
 @onready var details_panel: Panel = $Control/MarginContainer/VBoxContainer/HSplitContainer/DetailsPanel
 @onready var board_panel: Panel = $Control/MarginContainer/VBoxContainer/HSplitContainer/BoardPanel
+@onready var color_rect: ColorRect = $Control/ColorRect
 
-enum Category { OBJECTIVE, EQUIPMENT, BESTIARY, ENVIRONMENT, ARCHIVE }
 enum ViewMode { JOURNAL, BOARD }
 
-var current_category = Category.OBJECTIVE
+var current_category = JournalManager.Category.OBJECTIVE
 var current_view_mode = ViewMode.JOURNAL
 var current_topic: JournalTopic
 var in_journal: bool = false
@@ -30,18 +30,18 @@ signal JournalHidden
 
 
 func _ready() -> void:
-	button_objectives.pressed.connect(show_category.bind(Category.OBJECTIVE))
-	button_equipment.pressed.connect(show_category.bind(Category.EQUIPMENT))
-	button_bestiary.pressed.connect(show_category.bind(Category.BESTIARY))
-	button_environment.pressed.connect(show_category.bind(Category.ENVIRONMENT))
-	button_archive.pressed.connect(show_category.bind(Category.ARCHIVE))
+	button_objectives.pressed.connect(show_category.bind(JournalManager.Category.OBJECTIVE))
+	button_equipment.pressed.connect(show_category.bind(JournalManager.Category.EQUIPMENT))
+	button_bestiary.pressed.connect(show_category.bind(JournalManager.Category.BESTIARY))
+	button_environment.pressed.connect(show_category.bind(JournalManager.Category.ENVIRONMENT))
+	button_archive.pressed.connect(show_category.bind(JournalManager.Category.ARCHIVE))
 	button_journal.pressed.connect(set_view_mode.bind(ViewMode.JOURNAL))
 	button_board.pressed.connect(set_view_mode.bind(ViewMode.BOARD))
 
 	JournalManager.journal_updated.connect(_on_journal_updated)
 	JournalManager.topic_removed_from_board.connect(_on_topic_removed_from_board)
 	
-	show_category(Category.OBJECTIVE)
+	show_category(JournalManager.Category.OBJECTIVE)
 	set_view_mode(ViewMode.JOURNAL)
 
 
@@ -59,15 +59,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func set_view_mode(mode: ViewMode) -> void:
 	current_view_mode = mode
+	var category_color = JournalManager.get_category_color(current_category)
 	
 	match mode:
 		ViewMode.JOURNAL:
+			color_rect.modulate = category_color
 			details_panel.visible = true
 			board_panel.visible = false
 		ViewMode.BOARD:
+			color_rect.modulate = Color.WHITE
 			details_panel.visible = false
 			board_panel.visible = true
-			board_panel.reset_view()
 
 
 func show_journal() -> void:
@@ -92,12 +94,20 @@ func show_category(category: int) -> void:
 	_clear_topic_list()
 	_clear_entry_list()
 	
+	var category_color = JournalManager.get_category_color(category)
+	
+	if current_view_mode == ViewMode.JOURNAL:
+		color_rect.modulate = category_color
+	else:
+		color_rect.modulate = Color.WHITE
+	
 	var topics = JournalManager.get_known_topics(category)
 	
 	for topic in topics:
 		var button = DraggableTopicButton.new()
 		button.topic_data = topic
 		button.text = topic.title
+#		button.modulate = category_color
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.custom_minimum_size = Vector2(200.0, 0.0)
 		button.add_theme_font_size_override("Arial", 30)
@@ -124,6 +134,7 @@ func select_topic(topic: JournalTopic) -> void:
 	
 	for child in entry_list_container.get_children():
 		child.queue_free()
+		
 	entry_text_indices.clear()
 	
 	var entries = JournalManager.get_entries_for_topic(topic)
@@ -194,6 +205,8 @@ func _on_journal_updated() -> void:
 
 
 func _on_topic_removed_from_board(topic: JournalTopic) -> void:
+	var category_color = JournalManager.get_category_color(topic.category)
+	
 	for child in topic_list_container.get_children():
 		if child is DraggableTopicButton and child.topic_data == topic:
-			child.mark_as_available()
+			child.mark_as_available(category_color)
